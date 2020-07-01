@@ -1,1 +1,2 @@
-export { Entity, createEntity } from "./create-entity";
+export { createEntity, Entity } from "./create-entity";
+export { normalization, Flattened } from "./normalization";
