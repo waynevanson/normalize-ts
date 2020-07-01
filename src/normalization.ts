@@ -67,7 +67,7 @@ const makeOptional = <T extends ID>(
     [x: string]: any | Recursive | Recursive[];
   }
 
-  const recurse = (
+  const getRecursion = (
     flat: Flattened<any, any>,
     normalized: Record<string, Record<string, Flattened<T, any>>>
   ): O.Option<Recursive> =>
@@ -89,7 +89,7 @@ const makeOptional = <T extends ID>(
                   pipe(
                     R.lookup(to, normalized),
                     O.chain((flats) => pipe(R.lookup(id, flats))),
-                    O.chain((a) => recurse(a, normalized))
+                    O.chain((a) => getRecursion(a, normalized))
                   )
                 )
               ),
@@ -97,7 +97,7 @@ const makeOptional = <T extends ID>(
                 pipe(
                   R.lookup(to, normalized),
                   O.chain((flats) => pipe(R.lookup(id, flats))),
-                  O.chain((a) => recurse(a, normalized))
+                  O.chain((a) => getRecursion(a, normalized))
                 )
               ),
               E.fold(
@@ -124,7 +124,7 @@ const makeOptional = <T extends ID>(
         R.lookup(plural, normalized),
         O.map(
           R.map((flat) => {
-            const result = recurse(flat, normalized) as O.Option<T>;
+            const result = getRecursion(flat, normalized) as O.Option<T>;
             console.log(result);
             return result;
           })
