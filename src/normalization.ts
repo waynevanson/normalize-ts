@@ -4,13 +4,14 @@ import {
   monoid,
   option as O,
   record as R,
+  tuple as TP,
 } from "fp-ts";
 import { tuple } from "fp-ts/lib/function";
 import { pipe } from "fp-ts/lib/pipeable";
 import { Optional } from "monocle-ts";
 import { Entity, ID } from "./create-entity";
+import { tuplet } from "./higher-kinded-type";
 import { recordFindIndexUniq } from "./util";
-
 // flatten
 
 type SchemaBase = Record<string, Entity<any, any>>;
@@ -47,6 +48,13 @@ type NormalizationResult<S extends SchemaBase> = {
 
 type Schematic = { from: string; to: string; plural: string };
 
+const through = <T>(f: (a: T) => any = (a) => a) => (a: T) => {
+  console.dir(f(a));
+  return a;
+};
+
+const enforceArray = <T>(a: T | T[]): T[] => (Array.isArray(a) ? a : [a]);
+
 const schemaToSchematics = (schema: SchemaBase): Schematic[] =>
   pipe(
     schema,
@@ -54,9 +62,11 @@ const schemaToSchematics = (schema: SchemaBase): Schematic[] =>
       pipe(
         entity.resolvers(),
         R.toArray,
+        A.map(TP.mapLeft(tuplet.enforceNotTuplet)),
         A.map(([from, et]: [string, Entity<any, any>]) =>
           pipe(
             schema,
+            through((schema) => ({ schema })),
             recordFindIndexUniq((a) => a === et),
             O.map((to) => ({ to, from, plural }))
           )
@@ -157,6 +167,7 @@ const makeOptional = <T extends ID>(
           getSchematic(plural, from),
           // can flatten, can recurse
           O.map(({ to }) => {
+            console.dir({ to });
             return pipe(
               // enforce as array for folding.
               v as Recursive | Recursive[],
