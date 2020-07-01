@@ -234,7 +234,7 @@ const makeOptional = <T extends ID>(
         dictionary,
         R.foldMap(monoidNormalized)((nested) => setRecursion(plural, nested))
       );
-      return monoid.fold(monoidNormalized)([result, normalized]);
+      return monoid.fold(monoidNormalized)([normalized, result]);
     }
   );
 };
