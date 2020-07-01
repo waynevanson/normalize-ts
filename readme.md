@@ -24,6 +24,7 @@ With the many users shifting to a more functional paradigm, we need something mo
 Here are some goals for the future, in order.
 
 - [ ] Allow objects to have any id like `{uuid: number}`, not just `{ id: string}`
+- [ ] Allow own merge strategies. Currently it overwrites old data with new data.
 - [ ] Allow custom types in values, instead of just arrays and objects with other lenses.
 - [ ] Allow nested types with an unfold of some sort.
 
