@@ -66,7 +66,6 @@ const schemaToSchematics = (schema: SchemaBase): Schematic[] =>
         A.map(([from, et]: [string, Entity<any, any>]) =>
           pipe(
             schema,
-            through((schema) => ({ schema })),
             recordFindIndexUniq((a) => a === et),
             O.map((to) => ({ to, from, plural }))
           )
