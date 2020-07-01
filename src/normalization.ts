@@ -67,16 +67,26 @@ const makeOptional = <T extends ID>(
     [x: string]: any | Recursive | Recursive[];
   }
 
+  // from plural: users, from: group, to:groups
+  const getSchematic = (plural: string, from: string) => {
+    const result = pipe(
+      schematics,
+      A.findFirst((a) => a.plural === plural && a.from === from)
+    );
+    return result;
+  };
+
   const getRecursion = (
+    plural: string,
     flat: Flattened<any, any>,
     normalized: Record<string, Record<string, Flattened<T, any>>>
-  ): O.Option<Recursive> =>
-    pipe(
+  ): O.Option<Recursive> => {
+    // console.dir({ flat, schematics });
+    return pipe(
       flat,
       R.mapWithIndex((from, value) =>
         pipe(
-          schematics,
-          A.findFirst((a) => a.from === from && a.plural === plural),
+          getSchematic(plural, from),
           O.map(({ to }) =>
             pipe(
               value,
@@ -89,7 +99,7 @@ const makeOptional = <T extends ID>(
                   pipe(
                     R.lookup(to, normalized),
                     O.chain((flats) => pipe(R.lookup(id, flats))),
-                    O.chain((a) => getRecursion(a, normalized))
+                    O.chain((a) => getRecursion(to, a, normalized))
                   )
                 )
               ),
@@ -97,7 +107,7 @@ const makeOptional = <T extends ID>(
                 pipe(
                   R.lookup(to, normalized),
                   O.chain((flats) => pipe(R.lookup(id, flats))),
-                  O.chain((a) => getRecursion(a, normalized))
+                  O.chain((a) => getRecursion(to, a, normalized))
                 )
               ),
               E.fold(
@@ -114,6 +124,7 @@ const makeOptional = <T extends ID>(
       ),
       R.sequence(O.option)
     );
+  };
 
   return new Optional<
     Record<string, Record<string, Flattened<T, any>>>,
@@ -124,8 +135,9 @@ const makeOptional = <T extends ID>(
         R.lookup(plural, normalized),
         O.map(
           R.map((flat) => {
-            const result = getRecursion(flat, normalized) as O.Option<T>;
-            console.log(result);
+            const result = getRecursion(plural, flat, normalized) as O.Option<
+              T
+            >;
             return result;
           })
         ),
