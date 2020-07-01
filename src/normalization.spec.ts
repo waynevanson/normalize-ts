@@ -121,7 +121,7 @@ describe(normalization, () => {
       });
     });
 
-    test("retrieve a dictionary from the normalized, with recursion 1 deep", () => {
+    test("set a dictionary from the normalized, with recursion 1 deep", () => {
       type User = {
         id: string;
       };
@@ -144,7 +144,7 @@ describe(normalization, () => {
       });
     });
 
-    test("retrieve a dictionary from the normalized, with recursion 2 deep", () => {
+    test("set a dictionary from the normalized, with recursion 2 deep", () => {
       type User = {
         id: string;
         group: Group;
