@@ -1,6 +1,6 @@
 # normalize-ts
 
-Lenses for normalized state.
+Lenses for transformations between nexted and normalized objects.
 
 ## Installation
 
@@ -19,12 +19,15 @@ There are a few out in the community already, with `normalizr` being the most po
 The problem with these are that the Typescript support could be improved and they're imperative by design.
 With the many users shifting to a more functional paradigm, we need something more suited.
 
-## How to use
+## Next in line
 
-The mental model is to:
+Here are some goals for the future, in order.
 
-1. Create the Entities by using `createEntity`
-2. Create the Schema by adding the entities
+- [ ] Allow objects to have any id like `{uuid: number}`, not just `{ id: string}`
+- [ ] Allow custom types in values, instead of just arrays and objects with other lenses.
+- [ ] Allow nested types with an unfold of some sort.
+
+## Example
 
 ```ts
 // // Create a schema with entities
@@ -61,6 +64,8 @@ const schema = {
 
 // GET THE MAGIC
 const normalize = normalization(schema)
+
+// NOW LET'S USE IT
 
 const denormalized = {
   posts: {
@@ -108,7 +113,7 @@ const normalized = {
   },
 };
 
-expect(normalize.posts.getOption(normalized)).toStrictEqual(denormalized)
+expect(normalize.posts.getOption(normalized)).toStrictEqual(denormalized.posts)
 
 // set the posts using denormalized data,
 // transforming it into normalized dataa
