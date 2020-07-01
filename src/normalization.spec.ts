@@ -144,7 +144,7 @@ describe(normalization, () => {
       });
     });
 
-    test.skip("retrieve a dictionary from the normalized, with recursion 2 deep", () => {
+    test("retrieve a dictionary from the normalized, with recursion 2 deep", () => {
       type User = {
         id: string;
         group: Group;
@@ -170,28 +170,21 @@ describe(normalization, () => {
       const schema = { users, posts, groups };
       const normalize = normalization(schema);
 
-      const data = {
+      expect(
+        pipe(
+          { users: {}, posts: {}, groups: {} },
+          normalize.posts.set({
+            "22": {
+              id: "22",
+              author: { id: "11", group: { id: "33", name: "admin" } },
+            },
+          })
+        )
+      ).toMatchObject({
         users: { "11": { id: "11", group: "33" } },
         posts: { "22": { id: "22", author: "11" } },
         groups: { "33": { id: "33", name: "admin" } },
-      };
-
-      expect(normalize.users.getOption(data)).toMatchObject(
-        O.some({ "11": { id: "11", group: { id: "33", name: "admin" } } })
-      );
-
-      expect(normalize.posts.getOption(data)).toMatchObject(
-        O.some({
-          "22": {
-            id: "22",
-            author: { id: "11", group: { id: "33", name: "admin" } },
-          },
-        })
-      );
-
-      expect(normalize.groups.getOption(data)).toMatchObject(
-        O.some({ "33": { id: "33", name: "admin" } })
-      );
+      });
     });
   });
 });
