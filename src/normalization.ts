@@ -166,7 +166,6 @@ const makeOptional = <T extends ID>(
           getSchematic(plural, from),
           // can flatten, can recurse
           O.map(({ to }) => {
-            console.dir({ to });
             return pipe(
               // enforce as array for folding.
               v as Recursive | Recursive[],
