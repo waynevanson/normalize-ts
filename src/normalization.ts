@@ -1,6 +1,13 @@
-import { record as R, option as O, array as A, either as E } from "fp-ts";
+import {
+  array as A,
+  either as E,
+  monoid,
+  option as O,
+  record as R,
+} from "fp-ts";
+import { tuple } from "fp-ts/lib/function";
 import { pipe } from "fp-ts/lib/pipeable";
-import { Optional, Lens } from "monocle-ts";
+import { Optional } from "monocle-ts";
 import { Entity, ID } from "./create-entity";
 import { recordFindIndexUniq } from "./util";
 
@@ -126,6 +133,83 @@ const makeOptional = <T extends ID>(
     );
   };
 
+  // overwrite with the latest
+  const monoidNormalized = R.getMonoid(
+    R.getMonoid<string, Flattened<T, any>>({ concat: (x, y) => y })
+  );
+
+  const toNormalized = (plural: string, flattened: any) =>
+    R.singleton(plural, R.singleton(flattened.id, flattened)) as Record<
+      string,
+      Record<string, Flattened<T, any>>
+    >;
+
+  const setRecursion = (
+    plural: string,
+    nested: Recursive
+  ): Record<string, Record<string, Flattened<T, any>>> => {
+    // dictionary is not the nested!
+    const demo = pipe(
+      nested,
+      // fuck
+      R.mapWithIndex((from, v: any) =>
+        pipe(
+          getSchematic(plural, from),
+          // can flatten, can recurse
+          O.map(({ to }) => {
+            return pipe(
+              // enforce as array for folding.
+              v as Recursive | Recursive[],
+              O.fromPredicate((a): a is Recursive[] => Array.isArray(a)),
+              O.getOrElse(() => [v] as Recursive[]),
+              // do the recursive thing
+              A.foldMap(monoidNormalized)((a) => {
+                // why is this not on?
+                const result = setRecursion(to, a);
+                // console.dir({ aaaaa: a, result });
+                return result;
+              })
+            );
+          }),
+          O.fold(
+            () => tuple(v, monoidNormalized.empty),
+            (n) =>
+              tuple(
+                Array.isArray(v)
+                  ? pipe(
+                      v,
+                      A.map((a) => a.id)
+                    )
+                  : v.id,
+                n
+              )
+          )
+        )
+      ),
+      R.reduceWithIndex(
+        tuple(
+          {} as any,
+          [] as Record<string, Record<string, Flattened<T, any>>>[]
+        ),
+        (k, [bv, bn], [av, an]) => {
+          // console.dir({ k, bv, bn, av, an, plural });
+          return tuple(pipe(bv, R.insertAt(k, av)), A.snoc(bn, an));
+        }
+      ),
+      ([flattened, ns]) => {
+        const n = toNormalized(plural, flattened);
+        const result = A.snoc(ns, n);
+        // console.log({ flattened, ns, n });
+        return result;
+      },
+      A.foldMap(monoidNormalized)((a) => {
+        return a;
+      })
+    );
+
+    return demo;
+  };
+
   return new Optional<
     Record<string, Record<string, Flattened<T, any>>>,
     Record<string, T>
@@ -143,7 +227,15 @@ const makeOptional = <T extends ID>(
         ),
         O.chain(R.sequence(O.option))
       ),
-    (a) => (normalized) => normalized
+    // flatten the nested into the normalized state, then merge normalized states
+    // overwrite old with new.
+    (dictionary) => (normalized) => {
+      const result = pipe(
+        dictionary,
+        R.foldMap(monoidNormalized)((nested) => setRecursion(plural, nested))
+      );
+      return monoid.fold(monoidNormalized)([result, normalized]);
+    }
   );
 };
 
