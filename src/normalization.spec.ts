@@ -144,6 +144,32 @@ describe(normalization, () => {
       });
     });
 
+    test("set a dictionary from the normalized array, with recursion 1 deep", () => {
+      type User = {
+        id: string;
+      };
+
+      type Post = {
+        id: string;
+        authors: User[];
+      };
+
+      const users = createEntity<User>();
+      const posts = createEntity<Post, "authors">(() => ({ authors: [users] }));
+      const schema = { users, posts };
+      const normalize = normalization(schema);
+
+      expect(
+        pipe(
+          { users: {}, posts: {} },
+          normalize.posts.set({ "22": { id: "22", authors: [{ id: "11" }] } })
+        )
+      ).toMatchObject({
+        users: { "11": { id: "11" } },
+        posts: { "22": { id: "22", authors: ["11"] } },
+      });
+    });
+
     test("set a dictionary from the normalized, with recursion 2 deep", () => {
       type User = {
         id: string;
