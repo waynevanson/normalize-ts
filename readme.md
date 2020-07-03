@@ -1,3 +1,11 @@
+## TODO
+
+entities don't
+
+model is a record.
+dictionary is indxable by anything the user provides.
+properties don't need an index. instead they need an EQ/lens for the primary key.
+
 # normalize-ts
 
 Lenses for transformations between nexted and normalized objects.
