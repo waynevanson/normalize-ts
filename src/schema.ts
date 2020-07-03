@@ -58,3 +58,18 @@ export function schemaToSchemaInternal(schema: Schema): SchemaInternalBase {
     )
   );
 }
+
+// TEST
+type User = { id: string };
+type Post = { id: string; author: User; collaborators: User[] };
+
+const users = () => makeEntity<User>()([]);
+const posts = () =>
+  makeEntity<Post>()([
+    tuple(Lens.fromProp<Post>()("author"), users),
+    tuple(Lens.fromProp<Post>()("collaborators"), users),
+  ]);
+
+const schema = { users, posts };
+
+type SchemaInternalTest = SchemaInternal<typeof schema>;
