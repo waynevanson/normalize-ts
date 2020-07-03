@@ -14,3 +14,11 @@ export const recordFindIndexUniq = <A, B extends A>(
   if (r.length === 1) return O.some(r[0]);
   else return O.none;
 };
+
+export type KeysOfValueExclude<T, V> = {
+  [K in keyof T]: T[K] extends V ? never : K;
+}[keyof T];
+
+export type KeysOfValue<T, V> = {
+  [K in keyof T]: T[K] extends V ? K : never;
+}[keyof T];
