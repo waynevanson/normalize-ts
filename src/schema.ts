@@ -1,15 +1,9 @@
-import {
-  array as A,
-  map as M,
-  record as R,
-  tuple as TP,
-  option as O,
-} from "fp-ts";
-import { pipe, tuple, flow } from "fp-ts/lib/function";
+import { array as A, option as O, record as R, tuple as TP } from "fp-ts";
+import { pipe } from "fp-ts/lib/function";
 import { Lens } from "monocle-ts";
-import { EntityThunk, makeEntity, OneOrMany, Pair } from "./make-entity";
-import { KeysOfValue, recordFindIndexUniq } from "./util";
 import { tuplet } from "./higher-kinded-type";
+import { EntityThunk, OneOrMany, Pair } from "./make-entity";
+import { KeysOfValue, recordFindIndexUniq } from "./util";
 
 export type Schema = Record<string, EntityThunk<any, any>>;
 
@@ -31,7 +25,7 @@ export type SchemaInternal<S extends Schema> = {
     : never;
 };
 
-type SchemaInternalBase = Record<string, [Lens<any, any>, string][]>;
+export type SchemaInternalBase = Record<string, [Lens<any, any>, string][]>;
 
 const convertPairToString = (schema: Schema) => (
   a: OneOrMany<Pair<any, any>>
@@ -58,18 +52,3 @@ export function schemaToSchemaInternal(schema: Schema): SchemaInternalBase {
     )
   );
 }
-
-// TEST
-type User = { id: string };
-type Post = { id: string; author: User; collaborators: User[] };
-
-const users = () => makeEntity<User>()([]);
-const posts = () =>
-  makeEntity<Post>()([
-    tuple(Lens.fromProp<Post>()("author"), users),
-    tuple(Lens.fromProp<Post>()("collaborators"), users),
-  ]);
-
-const schema = { users, posts };
-
-type SchemaInternalTest = SchemaInternal<typeof schema>;
