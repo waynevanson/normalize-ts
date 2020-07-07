@@ -4,6 +4,7 @@ import {
   Relationship,
   Entity,
 } from "./types/entity";
+import { RecordUnknown } from "./types/util";
 
 /**
  * @summary
@@ -18,7 +19,7 @@ import {
  * @example
  * const users = () => makeEntity<User>()()
  */
-export function makeEntity<T>() {
+export function makeEntity<T extends RecordUnknown>() {
   return <
     I extends LensPrimaryKey<T, any>,
     R extends Array<OneOrMany<Relationship<T, any>>> = Array<never>

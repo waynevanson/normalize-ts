@@ -7,14 +7,8 @@ import {
   PipeableFunctorWithIndex1,
 } from "fp-ts/lib/pipeable";
 import { TraversableWithIndex1 } from "fp-ts/lib/TraversableWithIndex";
-import {
-  EntityInternal,
-  PairInternal,
-  SchemaBase,
-  SchemaInternal,
 } from "../schema";
 import { Normalize } from "./normalize";
-import { theseV as TV } from "../higher-kinded-type";
 
 export type DepsFaFap<F extends URIS, I> = {
   fa: TraversableWithIndex1<F, I> & Monad1<F>;
