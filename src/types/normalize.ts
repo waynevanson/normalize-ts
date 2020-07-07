@@ -7,7 +7,8 @@
 import { SchemaBase } from "./schema";
 import { URIS, Kind } from "fp-ts/lib/HKT";
 import { EntityConstructed } from "./entity";
-import { DataFlatten } from "./data";
+import { DataFlatten, DataNormalized } from "./data";
+import { RecordUnknown } from "./util";
 
 /**
  * @summary
@@ -24,8 +25,8 @@ export type Normalize<S extends SchemaBase, F extends URIS> = {
  * @summary
  *
  */
-export type Dictionary<
+export type DictionaryNormalized<
   F extends URIS,
   S extends SchemaBase,
-  T extends Record<string, any>
-> = Kind<F, DataFlatten<T, S>>;
+  T extends RecordUnknown
+> = Kind<F, DataNormalized<T, S>>;
