@@ -5,10 +5,11 @@
  * Also contains types for commonalities between the `get` and `set` modules.
  */
 import { SchemaBase } from "./schema";
-import { URIS, Kind } from "fp-ts/lib/HKT";
+import { URIS, Kind, HKT } from "fp-ts/lib/HKT";
 import { EntityConstructed } from "./entity";
 import { DataFlatten, DataNormalized } from "./data";
 import { RecordUnknown } from "./util";
+import { Lens } from "monocle-ts";
 
 /**
  * @summary
@@ -20,6 +21,14 @@ export type Normalize<S extends SchemaBase, F extends URIS> = {
     ? Kind<F, DataFlatten<A, S>>
     : never;
 };
+
+export type NormalizeResult = {};
+
+export type TransformFunction<F extends URIS, G> = <
+  T extends Record<string, any>
+>(
+  lens: Lens<T, unknown>
+) => Lens<Kind<F, T>, HKT<G, T>>;
 
 /**
  * @summary

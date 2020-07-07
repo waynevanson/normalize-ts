@@ -25,18 +25,4 @@ export const convertPairToString = (schema: SchemaBase) => (
 
 export function schemaToSchemaInternal<S extends SchemaBase>(
   schema: S
-): SchemaInternal<S> {
-  return pipe(
-    schema,
-    R.map((entityThunk) => {
-      const { id, relationships } = entityThunk();
-      const resolvers = pipe(
-        entity.relationships,
-        A.map(convertPairToString(schema)),
-        A.compact
-      );
-      const result = { id, resolvers };
-      return result;
-    })
-  );
-}
+): SchemaInternal<S> {}
