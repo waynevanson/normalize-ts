@@ -28,64 +28,6 @@ import {
   schemaToSchemaInternal,
 } from "../schema";
 import { theseV } from "../higher-kinded-type";
-// could do helper functions like
-// is circular,
-// is not circular
-//
-
-export type EntityFromType<T, S extends SchemaBase> = {
-  [P in keyof S]: ReturnType<S[P]> extends {
-    relationships: Array<OneOrMany<[T, any]>>;
-  }
-    ? ReturnType<S[P]>
-    : never;
-}[keyof S];
-
-export type FlattenBase = {
-  [x: string]:
-    | FlattenBase
-    | FlattenBase[]
-    | Circular<any, any>
-    | Circular<any, any>[]
-    | any;
-};
-
-/**
- * @summary
- *
- * This is handy for the user but not the
- * library owner.
- * The library owner will need a static type.
- *
- * @todo
- * How to find the name recursively?
- *
- * @todo
- * Implement recursive directly,
- * checking if it is it's own parent
- * and returning `Circular`.
- *
- * @todo
- * Implement recurive indirectly later.
- */
-export type Flatten<T, S extends SchemaBase> = {
-  [P in keyof T]: EntityFromType<T[P], S> extends infer U ? U : T[P];
-};
-
-export type NormalizeBase<F extends URIS> = Record<
-  string,
-  Kind<F, FlattenBase>
->;
-
-/**
- * The type that is associated with the dictionary.
- * It holds all the values for the given type.
- */
-export type Normalize<S extends SchemaBase, F extends URIS> = {
-  [P in keyof S]: S[P] extends EntityConstructed<infer A, any, any>
-    ? Kind<F, Flatten<A, S>>
-    : never;
-};
 
 /**
  *
@@ -141,12 +83,6 @@ type OptionalDictionary<
   S extends SchemaBase,
   T extends Record<string, any>
 > = Optional<Normalize<S, F>, Dictionary<F, S, T>>;
-
-type Dictionary<
-  F extends URIS,
-  S extends SchemaBase,
-  T extends Record<string, any>
-> = Kind<F, Flatten<T, S>>;
 
 const optionalNormalizedToDictionary = <
   F extends URIS,
