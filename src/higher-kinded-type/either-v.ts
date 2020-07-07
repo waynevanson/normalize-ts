@@ -1,6 +1,6 @@
 import { either, monoid, semigroup, show } from "fp-ts";
 import { pipeable } from "fp-ts/lib/pipeable";
-import { Infos, monoidInfos, showInfos } from "./validation/info";
+import { Infos, monoidInfos, showInfos } from "./either-v/info";
 
 export type EitherV<A> = either.Either<Infos, A>;
 

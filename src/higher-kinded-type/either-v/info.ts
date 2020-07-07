@@ -1,19 +1,11 @@
-import { array, either, show } from "fp-ts";
-import { pipe } from "fp-ts/lib/pipeable";
+import { array, show } from "fp-ts";
+import { inspect } from "util";
 
 export const monoidInfos = array.getMonoid<Info>();
 
-export const showEitherString = either.getShow(
-  show.showString,
-  show.showString
-);
-
 export const showObject: show.Show<object> = {
   show: (object) =>
-    pipe(
-      either.tryCatch(() => JSON.stringify(object, undefined, 2), String),
-      showEitherString.show
-    ),
+    inspect(object, { getters: true, sorted: true, depth: null }),
 };
 
 export const showInfo = show.getStructShow<Info>({

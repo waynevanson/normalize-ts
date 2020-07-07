@@ -1,34 +1,13 @@
 import { array as A, option as O, record as R, tuple as TP } from "fp-ts";
 import { pipe } from "fp-ts/lib/function";
-import { Lens } from "monocle-ts";
+import { OneOrMany } from ".";
 import { tuplet } from "./higher-kinded-type";
-import { EntityThunk, OneOrMany, Pair } from "./make-entity";
-import { KeysOfValue, recordFindIndexUniq } from "./util";
+import { SchemaBase, SchemaInternal } from "./types/schema";
+import { recordFindIndexUniq } from "./util";
+import { Relationship } from "./types/entity";
 
-export type Schema = Record<string, EntityThunk<any, any>>;
-
-/**
- * @summary
- * The result of turning keys into
- */
-export type SchemaInternal<S extends Schema> = {
-  [P in keyof S]: ReturnType<S[P]> extends Array<
-    OneOrMany<[infer L, OneOrMany<infer A>]>
-  >
-    ? Array<
-        unknown extends A
-          ? never
-          : L extends any
-          ? [L, KeysOfValue<S, A>]
-          : never
-      >
-    : never;
-};
-
-export type SchemaInternalBase = Record<string, [Lens<any, any>, string][]>;
-
-const convertPairToString = (schema: Schema) => (
-  a: OneOrMany<Pair<any, any>>
+export const convertPairToString = (schema: SchemaBase) => (
+  a: OneOrMany<Relationship<any, any>>
 ) =>
   pipe(
     tuplet.enforceNotTuplet(a),
@@ -44,11 +23,20 @@ const convertPairToString = (schema: Schema) => (
     O.map(TP.swap)
   );
 
-export function schemaToSchemaInternal(schema: Schema): SchemaInternalBase {
+export function schemaToSchemaInternal<S extends SchemaBase>(
+  schema: S
+): SchemaInternal<S> {
   return pipe(
     schema,
-    R.map((entityThunk) =>
-      pipe(entityThunk(), A.map(convertPairToString(schema)), A.compact)
-    )
+    R.map((entityThunk) => {
+      const { id, relationships } = entityThunk();
+      const resolvers = pipe(
+        entity.relationships,
+        A.map(convertPairToString(schema)),
+        A.compact
+      );
+      const result = { id, resolvers };
+      return result;
+    })
   );
 }
