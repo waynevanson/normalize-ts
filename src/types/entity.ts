@@ -43,9 +43,9 @@ export type LensPrimaryKey<S extends RecordUnknown, A> = Lens<S, A>;
  * @typedef R raw data type represented by the entity.
  */
 export type Entity<
-  T,
+  T extends RecordUnknown,
   I extends LensPrimaryKey<T, any>,
-  R extends Array<OneOrMany<Relationship<T, any>>> = Array<never>
+  R extends Array<OneOrMany<Relationship<T, RecordUnknown>>> = Array<never>
 > = {
   lensPrimaryKey: I;
   relationships: R;
@@ -59,7 +59,7 @@ export type Entity<
  * @property 0 The lens that link the data `T` to
  * @property 1 An entity that is in a
  */
-export type Relationship<T, U> = [
+export type Relationship<T extends RecordUnknown, U extends RecordUnknown> = [
   Lens<T, U>,
   OneOrMany<EntityConstructed<U, any>>
 ];
@@ -75,7 +75,7 @@ export type OneOrMany<A> = One<A> | Many<A>;
  * signature we work with internally.
  */
 export type EntityConstructed<
-  T,
+  T extends RecordUnknown,
   I extends LensPrimaryKey<T, any>,
   R extends Array<OneOrMany<Relationship<T, any>>> = Array<never>
 > = Lazy<Entity<T, I, R>>;
