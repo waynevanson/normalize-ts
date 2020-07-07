@@ -81,9 +81,16 @@ export type DataFlattenedBase = {
  *
  * @typedef C
  */
-export type DataFlatten<T, S extends SchemaBase, C = T> = {
+export type DataFlatten<
+  T extends RecordUnknown,
+  S extends SchemaBase,
+  C = T
+> = {
   // no we got the entity, we can figure out
-  [P in keyof T]: EntityFromType<T[P], S> extends EntityConstructed<
+  [P in keyof T]: EntityConstructedFromType<
+    T[P] extends RecordUnknown ? T[P] : never,
+    S
+  > extends EntityConstructed<
     T,
     any,
     // array of relationships
@@ -99,7 +106,10 @@ export type DataFlatten<T, S extends SchemaBase, C = T> = {
  * @summary
  * Retrieve the entity constructed from a schema using it's data type `T`.
  */
-export type EntityFromType<T, S extends SchemaBase> = {
+export type EntityConstructedFromType<
+  T extends RecordUnknown,
+  S extends SchemaBase
+> = {
   [P in keyof S]: ReturnType<S[P]> extends EntityConstructed<T, any, any>
     ? ReturnType<S[P]>
     : never;
