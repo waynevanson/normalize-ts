@@ -22,7 +22,7 @@
 
 import { Lens } from "monocle-ts";
 import { Lazy } from "fp-ts/lib/function";
-import { RecordAny } from "./util";
+import { RecordUnknown } from "./util";
 
 // EXTERNAL - PREINTERNALIZED
 
@@ -30,7 +30,7 @@ import { RecordAny } from "./util";
  * @summary
  *
  */
-export type LensPrimaryKey<S extends RecordAny, A> = Lens<S, A>;
+export type LensPrimaryKey<S extends RecordUnknown, A> = Lens<S, A>;
 
 /**
  * @summary
@@ -119,8 +119,8 @@ export type Resolver<T, U, K extends string> = {
  * the result is `"Many"`,
  * otherwise it's `"One"`
  */
-export type ResolverType<U> = U extends RecordAny[]
+export type ResolverType<U> = U extends RecordUnknown[]
   ? "One"
-  : U extends RecordAny
+  : U extends RecordUnknown
   ? "Many"
   : never;

@@ -10,13 +10,13 @@
  * @summary
  * A utility type to increase code resuse.
  */
-export type RecordAny = Record<string, any>;
+export type RecordUnknown = Record<string, unknown>;
 
 /**
  * @summary
  * Retrieve the key of an object if it's value does not equal `V`.
  */
-export type KeysOfValueExclude<T extends RecordAny, V> = {
+export type KeysOfValueExclude<T extends RecordUnknown, V> = {
   [K in keyof T]: T[K] extends V ? never : K;
 }[keyof T];
 
@@ -24,6 +24,6 @@ export type KeysOfValueExclude<T extends RecordAny, V> = {
  * @summary
  * Retrieve the key of an object if it's value equals `V`.
  */
-export type KeysOfValue<T extends RecordAny, V> = {
+export type KeysOfValue<T extends RecordUnknown, V> = {
   [K in keyof T]: T[K] extends V ? K : never;
 }[keyof T];
