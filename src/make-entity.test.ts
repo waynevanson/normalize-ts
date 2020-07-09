@@ -1,7 +1,7 @@
-import { makeEntity } from "./make-entity";
-import { Lens } from "monocle-ts";
-import { Entity } from "./types/entity";
 import { tuple } from "fp-ts/lib/function";
+import { Lens } from "monocle-ts";
+import { makeEntity } from "./make-entity";
+import { Entity } from "./types/entity";
 
 describe(makeEntity, () => {
   test("creates the most basic entity", () => {

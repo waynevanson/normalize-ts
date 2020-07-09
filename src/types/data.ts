@@ -1,12 +1,9 @@
 /**
  * @description
  * Types for changing the shape of data
- *
- * @todo
- * lenses for top level stuff in normalized or here?
  */
 
-import { either as E, extend } from "fp-ts";
+import { either as E } from "fp-ts";
 import { EntityConstructed, OneOrMany, Relationship } from "./entity";
 import { SchemaBase } from "./schema";
 import { RecordUnknown } from "./util";
@@ -23,12 +20,11 @@ import { RecordUnknown } from "./util";
 export type DataNormalized<T extends RecordUnknown, S extends SchemaBase> = {
   // get the relationships
   // keyof map
+  // check if recordunknown is resolvable. if so, do something good.
   [P in keyof T]: T[P] extends RecordUnknown
     ? DataNormalized<T[P], S>
     : T[P] extends Array<infer U>
-    ? U extends RecordUnknown
-      ? DataNormalized<U, S>
-      : T[P]
+    ? Array<U extends RecordUnknown ? DataNormalized<U, S> : T[P]>
     : never;
 };
 
@@ -65,11 +61,11 @@ export type DataFlattenedBase = {
  *
  * @todo
  * More so, we need a deep check, like in redux
+ * if a recordunknown|recordunknown[] has 2 of the same but
+ * only one is in,then only do one. this is becuase we don't have the path: (yet)
  *
  * @todo
  * How to find the name recursively?
- *
- *
  *
  * @todo
  * Implement recursive directly,
@@ -96,7 +92,9 @@ export type DataFlatten<
     // array of relationships
     infer R
   >
-    ? R
+    ? R extends OneOrMany<infer U>
+      ? U
+      : never
     : T[P];
 };
 

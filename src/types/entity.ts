@@ -45,7 +45,7 @@ export type LensPrimaryKey<S extends RecordUnknown, A> = Lens<S, A>;
 export type Entity<
   T extends RecordUnknown,
   I extends LensPrimaryKey<T, any>,
-  R extends Array<OneOrMany<Relationship<T, RecordUnknown>>> = Array<never>
+  R extends Array<OneOrMany<Relationship<T, any>>>
 > = {
   lensPrimaryKey: I;
   relationships: R;
@@ -61,7 +61,7 @@ export type Entity<
  */
 export type Relationship<T extends RecordUnknown, U extends RecordUnknown> = [
   Lens<T, U>,
-  OneOrMany<EntityConstructed<U, any>>
+  OneOrMany<EntityConstructed<U, any, any>>
 ];
 
 export type One<A> = A;
@@ -77,7 +77,7 @@ export type OneOrMany<A> = One<A> | Many<A>;
 export type EntityConstructed<
   T extends RecordUnknown,
   I extends LensPrimaryKey<T, any>,
-  R extends Array<OneOrMany<Relationship<T, any>>> = Array<never>
+  R extends Array<OneOrMany<Relationship<T, any>>>
 > = Lazy<Entity<T, I, R>>;
 
 // INTERNAL - POSTINTERNALIZED
