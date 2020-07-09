@@ -20,19 +20,19 @@ import { RecordUnknown } from "./util";
  */
 export type Circular<T extends RecordUnknown, I> = E.Either<I, T>;
 
-export type DataFlattenedValueBase =
-  | DataFlattenedBase
-  | DataFlattenedBase[]
-  | Circular<any, any>
-  | Circular<any, any>[];
+export type DataFlattenedValueBase<I> =
+  | DataFlattenedBase<I>
+  | DataFlattenedBase<I>[]
+  | Circular<any, I>
+  | Circular<any, I>[];
 
 /**
  * @summary
  * If not `RecordAny`, the flattened data may contain any of these values,
  * possibly recursing.
  */
-export type DataFlattenedBase = {
-  [x: string]: DataFlattenedValueBase;
+export type DataFlattenedBase<I> = {
+  [x: string]: DataFlattenedValueBase<I>;
 };
 
 /**
