@@ -27,3 +27,7 @@ export type KeysOfValueExclude<T extends RecordUnknown, V> = {
 export type KeysOfValue<T extends RecordUnknown, V> = {
   [K in keyof T]: T[K] extends V ? K : never;
 }[keyof T];
+
+export type ExtractArray<T extends any[]> = T extends Array<infer U>
+  ? U
+  : never;

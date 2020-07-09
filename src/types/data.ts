@@ -4,52 +4,9 @@
  */
 
 import { either as E } from "fp-ts";
-import { Lens } from "monocle-ts";
-import { Entity, EntityConstructed, OneOrMany } from "./entity";
+import { EntityConstructed, OneOrMany } from "./entity";
 import { SchemaBase } from "./schema";
 import { RecordUnknown } from "./util";
-
-// NORMALIZED - T IN DICTIONARY
-
-type RelationshipsFromEntityConstructed<
-  T extends EntityConstructed<T, any, any>
-> = ReturnType<T> extends Entity<T, any, any>
-  ? ReturnType<T>["relationships"]
-  : never;
-
-type DataNormalizedValue<
-  T,
-  S extends SchemaBase,
-  R extends ExtractArray<
-    RelationshipsFromEntityConstructed<EntityConstructedFromType<T, S>>
-  >
-> = T extends RecordUnknown
-  ? Extract<R, [Lens<any, T[]>, any]> extends any
-    ? string
-    : DataNormalized<T, S>
-  : T;
-
-type ExtractArray<T extends any[]> = T extends Array<infer U> ? U : never;
-
-/**
- * @summary
- * The value will be a string or a string[] of it's a resolvable
- */
-export type DataNormalized<
-  T extends RecordUnknown,
-  S extends SchemaBase,
-  R extends ExtractArray<
-    RelationshipsFromEntityConstructed<EntityConstructedFromType<T, S>>
-  > = ExtractArray<
-    RelationshipsFromEntityConstructed<EntityConstructedFromType<T, S>>
-  >
-> = {
-  [P in keyof T]: T[P] extends Array<infer U>
-    ? Array<DataNormalizedValue<U, S, R>>
-    : T[P] extends RecordUnknown
-    ? DataNormalizedValue<T[P], S, R>
-    : T[P];
-};
 
 // FLATTENED - T FROM PLURAL.GET
 
