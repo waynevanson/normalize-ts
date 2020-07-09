@@ -10,7 +10,7 @@
  * @summary
  * A utility type to increase code resuse.
  */
-export type RecordUnknown = Record<string, unknown>;
+export type RecordUnknown = Record<string, any>;
 
 /**
  * @summary

@@ -60,13 +60,15 @@ export type Entity<
  * @property 1 An entity that is in a
  */
 export type Relationship<T extends RecordUnknown, U extends RecordUnknown> = [
-  Lens<T, U>,
+  Lens<T, OneOrAll<U>>,
   OneOrMany<EntityConstructed<U, any, any>>
 ];
 
 export type One<A> = A;
 export type Many<A> = [A];
+export type All<T> = Array<T>;
 export type OneOrMany<A> = One<A> | Many<A>;
+export type OneOrAll<T> = One<T> | All<T>;
 
 /**
  * @summary

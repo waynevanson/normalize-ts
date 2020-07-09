@@ -1,9 +1,4 @@
-import {
-  LensPrimaryKey,
-  OneOrMany,
-  Relationship,
-  Entity,
-} from "./types/entity";
+import { LensPrimaryKey, Relationship, Entity } from "./types/entity";
 import { RecordUnknown } from "./types/util";
 
 /**
@@ -22,7 +17,7 @@ import { RecordUnknown } from "./types/util";
 export function makeEntity<T extends RecordUnknown>() {
   return <
     I extends LensPrimaryKey<T, any>,
-    R extends Array<OneOrMany<Relationship<T, any>>> = Array<never>
+    R extends Array<Relationship<T, any>>
   >(
     lensPrimaryKey: I,
     relationships: R
