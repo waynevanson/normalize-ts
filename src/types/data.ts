@@ -4,9 +4,12 @@
  */
 
 import { either as E } from "fp-ts";
-import { EntityConstructed, OneOrMany, Relationship } from "./entity";
+import { EntityConstructed, OneOrMany } from "./entity";
 import { SchemaBase } from "./schema";
 import { RecordUnknown } from "./util";
+import { Lens } from "monocle-ts";
+import { makeEntity } from "..";
+import { tuple } from "fp-ts/lib/function";
 
 // NORMALIZED - T IN DICTIONARY
 
@@ -18,15 +21,42 @@ import { RecordUnknown } from "./util";
  * Make a traverse type, redux has an implementation
  */
 export type DataNormalized<T extends RecordUnknown, S extends SchemaBase> = {
-  // get the relationships
-  // keyof map
-  // check if recordunknown is resolvable. if so, do something good.
   [P in keyof T]: T[P] extends RecordUnknown
-    ? DataNormalized<T[P], S>
+    ? EntityConstructedFromType<T[P], S> extends any
+      ? string
+      : DataNormalized<T[P], S>
     : T[P] extends Array<infer U>
-    ? Array<U extends RecordUnknown ? DataNormalized<U, S> : T[P]>
-    : never;
+    ? Array<
+        U extends RecordUnknown
+          ? EntityConstructedFromType<U, S> extends any
+            ? string
+            : DataNormalized<U, S>
+          : U
+      >
+    : T[P];
 };
+
+type User = {
+  id: string;
+};
+
+type Post = {
+  id: string;
+  collaborators: User[];
+};
+
+const lensUser = Lens.fromProp<User>()("id");
+const usersRelationships: never[] = [];
+const users = () => makeEntity<User>()(lensUser, usersRelationships);
+
+const lensPost = Lens.fromProp<Post>()("id");
+const postsRelationships = [
+  tuple(Lens.fromProp<Post>()("collaborators"), tuple(users)),
+];
+const posts = () => makeEntity<Post>()(lensPost, postsRelationships);
+
+const schema = { users, posts };
+type NN = DataNormalized<Post, typeof schema>;
 
 // FLATTENED - T FROM PLURAL.GET
 
