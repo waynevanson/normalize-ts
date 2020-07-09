@@ -3,20 +3,11 @@
  * Types for changing the shape of data
  */
 
-import { either as E, extend } from "fp-ts";
-import {
-  EntityConstructed,
-  OneOrMany,
-  Relationship,
-  Entity,
-  All,
-} from "./entity";
+import { either as E } from "fp-ts";
+import { Lens } from "monocle-ts";
+import { Entity, EntityConstructed, OneOrMany } from "./entity";
 import { SchemaBase } from "./schema";
 import { RecordUnknown } from "./util";
-import { Lens } from "monocle-ts";
-import { makeEntity } from "..";
-import { tuple } from "fp-ts/lib/function";
-import { None } from "fp-ts/lib/Option";
 
 // NORMALIZED - T IN DICTIONARY
 
@@ -27,16 +18,16 @@ type RelationshipsFromEntityConstructed<
   : never;
 
 type DataNormalizedValue<
-  U,
+  T,
   S extends SchemaBase,
   R extends ExtractArray<
     RelationshipsFromEntityConstructed<EntityConstructedFromType<T, S>>
   >
-> = U extends RecordUnknown
-  ? Extract<R, [Lens<any, U[]>, any]> extends any
+> = T extends RecordUnknown
+  ? Extract<R, [Lens<any, T[]>, any]> extends any
     ? string
-    : DataNormalized<U, S>
-  : U;
+    : DataNormalized<T, S>
+  : T;
 
 type ExtractArray<T extends any[]> = T extends Array<infer U> ? U : never;
 
@@ -54,9 +45,9 @@ export type DataNormalized<
   >
 > = {
   [P in keyof T]: T[P] extends Array<infer U>
-    ? Array<DataNormalizedValue<T, S, R>>
+    ? Array<DataNormalizedValue<U, S, R>>
     : T[P] extends RecordUnknown
-    ? DataNormalizedValue<T, S, R>
+    ? DataNormalizedValue<T[P], S, R>
     : T[P];
 };
 
