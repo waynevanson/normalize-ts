@@ -70,6 +70,12 @@ export function oRecurseResolverMany({ to }: ResolverMany) {
   );
 }
 
+const through = <A>(a: A) => {
+  console.log("debug");
+  console.dir(a);
+  return a;
+};
+
 export function getOptionInner(
   index: number,
   plural: string,
@@ -83,18 +89,22 @@ export function getOptionInner(
     RE.map(
       RC.mapWithIndex((from, value) =>
         pipe(
-          RE.asks(({ resolvers }: NormalizeDeps) => resolvers),
+          RE.asks<NormalizeDeps, Array<unknown>, Resolver[]>(
+            ({ resolvers }: NormalizeDeps) => resolvers
+          ),
           RE.map(retrieveResolver(plural, from)),
           RE.map(
             flow(
               O.map(eResolverType),
               O.map(E.fold(oRecurseResolverMany, oRecurseResolverOne)),
+              O.map(through),
               O.getOrElse(() => value)
             )
           )
         )
       )
-    )
+    ),
+    RE.chain(RC.sequence(RE.readerEither))
   );
 }
 
