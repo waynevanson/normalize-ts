@@ -55,17 +55,8 @@ export function normalize<S extends Schema>(
             (a) =>
               pipe(
                 setMain(plural, a as Dictionary),
-                R.chain((z) =>
-                  pipe(
-                    R.asks(({ normalized }: NormalizeDeps) => normalized),
-                    R.map((cc) =>
-                      RC.getMonoid(A.getMonoid<RecordData>()).concat(
-                        cc,
-                        RC.singleton(plural, z)
-                      )
-                    )
-                  )
-                ),
+                // should fail when we go deeper.
+                R.map((v) => RC.singleton(plural, v)),
                 R.local(
                   (normalized): NormalizeDeps => ({ normalized, resolvers })
                 )

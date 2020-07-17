@@ -13,3 +13,4 @@ export {
   ResolverMany,
   makeResolversFromSchema,
 } from "./schema";
+export { normalize, Normalized, Dictionary } from "./normalize";
