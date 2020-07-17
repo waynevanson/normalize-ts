@@ -1,7 +1,7 @@
 import { either, monoid, semigroup, show, array as A } from "fp-ts";
 import { pipeable } from "fp-ts/lib/pipeable";
 
-export type EitherV<A> = either.Either<unknown, A>;
+export type EitherV<A> = either.Either<unknown[], A>;
 
 const monoidUnknown = A.getMonoid<unknown>();
 export const eitherV = either.getValidation(monoidUnknown);
