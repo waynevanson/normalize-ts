@@ -14,9 +14,18 @@ export function makeEntity<A extends RecordData>() {
   });
 }
 
-export type RecordUnknown = Record<string, unknown>;
+export type PrimitiveValue = string | number | boolean;
+
+export type RecordDataSelf = RecordDataBase | Array<RecordDataBase>;
+
+export type RecordDataValue =
+  | PrimitiveValue
+  | Array<PrimitiveValue>
+  | RecordDataSelf;
+
+export type RecordDataBase = { [x: string]: RecordDataValue };
 export type RecordID = Record<"id", string>;
-export type RecordData = RecordID & RecordUnknown;
+export type RecordData = RecordDataBase & RecordID;
 
 export type EnitableKeys<T extends RecordData> = {
   [P in keyof T]: T[P] extends RecordData | RecordData[] ? P : never;
