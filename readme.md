@@ -129,3 +129,7 @@ expect(normalize.posts.getOption(normalized)).toStrictEqual(denormalized.posts)
 expect(normalize.users.set(normalized.posts)).toStrictEqual(normalized)
 
 ```
+
+## Design
+
+needs to be record based.
