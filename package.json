@@ -26,20 +26,23 @@
     "destiny": "^0.7.0",
     "dtslint": "^3.6.12",
     "fp-ts": "^2.7.0",
+    "io-ts": "^2.2.9",
     "jest": "^26.1.0",
+    "monocle-ts": "^2.2.0",
     "parcel-bundler": "^1.12.4",
     "prettier": "^2.0.5",
+    "refinement-ts": "^0.0.1",
     "ts-jest": "^26.1.3",
     "ts-node": "^8.10.2",
     "tsd": "^0.13.1",
-    "typescript": "^3.9.7",
-    "io-ts": "^2.2.9",
-    "monocle-ts": "^2.2.0",
-    "refinement-ts": "^0.0.1"
+    "typescript": "^3.9.7"
   },
   "peerDependencies": {
     "fp-ts": "^2.5.4",
     "io-ts": "^2.2.9",
     "monocle-ts": "^2.2.0"
+  },
+  "dependencies": {
+    "normalizr": "^3.6.0"
   }
 }
