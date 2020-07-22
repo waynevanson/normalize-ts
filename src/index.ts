@@ -1,2 +1,2 @@
 export { normalize } from "./normalize";
-export { Entity } from "./entity";
+export { Entity, makeEntity } from "./entity";
