@@ -1,6 +1,6 @@
 {
   "name": "normalize-ts",
-  "version": "0.1.2",
+  "version": "0.2.0",
   "license": "MIT",
   "author": {
     "name": "Wayne Van Son",
@@ -39,7 +39,6 @@
   },
   "peerDependencies": {
     "fp-ts": "^2.5.4",
-    "io-ts": "^2.2.9",
     "monocle-ts": "^2.2.0"
   },
   "dependencies": {
