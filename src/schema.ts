@@ -3,12 +3,21 @@
  * Get a pair of relationships and make it work.
  */
 
-import { NormalizrEntity, makeNormalizrEntity } from "./normalizr";
-import { LazyEntity, RecordData, Relationships } from "./entity";
-import { pipe } from "fp-ts/lib/function";
+import {
+  NormalizrEntity,
+  makeNormalizrEntity,
+  NormalizrRelationships,
+} from "./normalizr";
+import {
+  LazyEntity,
+  RecordData,
+  Relationships,
+  RelationshipValue,
+} from "./entity";
+import { pipe, tuple } from "fp-ts/lib/function";
 import { record as RC, either as E, option as O, array as A } from "fp-ts";
 import { Lens } from "monocle-ts";
-import { isatty } from "tty";
+import { recordFindIndexUniq } from "./util";
 
 export function isArray<T>(a: T): a is Extract<T, Array<any>> {
   return Array.isArray(a);
@@ -37,35 +46,99 @@ export interface Resolver<T extends RecordData> {
   plural: string;
   from: string;
   to: string;
-  entity: NormalizrEntity;
 }
 
+const makeResolver = (
+  entities: Record<string, LazyEntity<RecordData, Relationships>>,
+  lens: Lens<RecordData, string>,
+  plural: string
+) => (
+  from: string,
+  aRelationship: RelationshipValue
+): O.Option<Resolver<RecordData>> =>
+  pipe(enforceNotTuplet<LazyEntity<RecordData, any>>(aRelationship), (lazy) =>
+    pipe(
+      entities,
+      recordFindIndexUniq((a) => Object.is(a, lazy)),
+      O.map(
+        (to): Resolver<RecordData> => ({
+          from,
+          lens,
+          plural,
+          to,
+          type: isArray(aRelationship) ? "Many" : "One",
+        })
+      )
+    )
+  );
+
 // lazy entities can be compared.
-export function makeSchema(
-  entities: Record<string, LazyEntity<RecordData, Relationships>>
-) {
-  return pipe(
+export function makeSchema<
+  S extends Record<string, LazyEntity<RecordData, Relationships>>
+>(entities: S): Schema<S> {
+  const normalizrEntities = pipe(
+    entities,
+    RC.mapWithIndex((plural, lazyEntity) =>
+      pipe(lazyEntity(), ({ lens }) =>
+        makeNormalizrEntity({ name: plural, lens, relationships: {} })
+      )
+    )
+  );
+
+  const resolvers = pipe(
     entities,
     RC.mapWithIndex((plural, lazyEntity) =>
       pipe(lazyEntity(), ({ relationships, lens }) =>
         pipe(
           relationships,
           RC.filterMap(O.fromNullable),
-          RC.collect(
-            (from, aRelationship): O.Option<Resolver<RecordData>> =>
-              pipe(
-                enforceNotTuplet<LazyEntity<RecordData, any>>(aRelationship),
-                (lazy) => RC()
-              )
-          )
+          RC.collect(makeResolver(entities, lens, plural)),
+          A.compact
         )
       )
-    )
+    ),
+    RC.collect((_, v) => v),
+    A.flatten
   );
+
+  // find any matching resolver and assign it's value to the thing.
+  const normalizrSchema = pipe(
+    normalizrEntities,
+    RC.mapWithIndex((plural, entity) =>
+      pipe(
+        resolvers,
+        // find resolvers for this entity
+        A.filter((resolver) => resolver.plural === plural),
+        // find the enity with the correct to value
+        A.filterMap((resolver) =>
+          pipe(
+            normalizrEntities,
+            RC.lookup(resolver.to),
+            O.map((toEntity) => tuple(toEntity, resolver))
+          )
+        ),
+        // assign mutably to the entity class.
+        A.reduce(entity, (b, [toEntity, resolver]) => {
+          b.define({ [resolver.from]: makeDefinableValue(resolver, toEntity) });
+          return b;
+        })
+      )
+    ),
+    RC.map(tuple)
+  );
+
+  return { _S: null as any, entities: normalizrSchema };
+}
+
+function makeDefinableValue(
+  resolver: Resolver<RecordData>,
+  entity: NormalizrEntity
+) {
+  return resolver.type === "Many" ? tuple(entity) : entity;
 }
 
 export interface Schema<S> {
   _S: S;
   // normalizr relationships
-  entities: Record<string, NormalizrEntity>;
+  entities: NormalizrRelationships;
 }

@@ -9,11 +9,12 @@ import { Lens } from "monocle-ts";
 import * as _normalizr from "normalizr";
 import { schema as _schema } from "normalizr";
 import { RecordData } from "../entity";
+import { Normalized } from "../set";
 
 export interface NormalizrEntity extends _schema.Entity {}
 
 export interface NormalizrRelationships
-  extends Record<string, NormalizrEntity> {}
+  extends Record<string, NormalizrEntity | [NormalizrEntity]> {}
 
 /**
  * @summary
@@ -26,7 +27,7 @@ export interface NormalizrEntityParams {
    */
   name: string;
   relationships?: NormalizrRelationships;
-  lens?: Lens<object, string>;
+  lens?: Lens<RecordData, string>;
 }
 
 // this is internal for normalizr only.
@@ -48,7 +49,7 @@ export interface NormalizrSchema
   extends Record<string, NormalizrEntity | [NormalizrEntity]> {}
 
 // set
-export function normalize(data: Record<string, Record<string, RecordData>>) {
+export function normalize(data: Record<string, Array<RecordData>>) {
   return (schema: NormalizrSchema) => _normalizr.normalize(data, schema);
 }
 
@@ -56,8 +57,7 @@ export type DictionaryData = RecordData;
 
 // get
 // keep in mind that this has the plural property in it.
-export function denormalize(
-  data: Record<string, Record<string, DictionaryData>>
-) {
-  return (schema: NormalizrSchema) => _normalizr.normalize(data, schema);
+export function denormalize(data: Record<string, Record<string, RecordData>>) {
+  return (schema: NormalizrSchema, normalized: Normalized) =>
+    _normalizr.denormalize(data, schema, normalized);
 }

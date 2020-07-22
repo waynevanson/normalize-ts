@@ -13,7 +13,7 @@ export interface Entity<A extends RecordData, R extends Relationships> {
   readonly _tag: "Entity";
   readonly _A: A;
   relationships: R;
-  lens: Lens<A, string>;
+  lens: Lens<RecordData, string>;
 }
 
 export interface EntityOptions<A> {
@@ -22,17 +22,17 @@ export interface EntityOptions<A> {
 
 export type RecordID = Record<"id", string>;
 
+export function makeEntity<A extends RecordData & RecordID>(): <
+  R extends RelationshipMap<A>
+>(
+  relationships: R
+) => Entity<A, R>;
+
 export function makeEntity<A extends RecordData>(): <
   R extends RelationshipMap<A>
 >(
   relationships: R,
   options: EntityOptions<A>
-) => Entity<A, R>;
-
-export function makeEntity<A extends RecordData & RecordID>(): <
-  R extends RelationshipMap<A>
->(
-  relationships: R
 ) => Entity<A, R>;
 
 export function makeEntity<A extends RecordData>() {
@@ -43,6 +43,7 @@ export function makeEntity<A extends RecordData>() {
     _tag: "Entity",
     _A: null as any,
     relationships,
+    //@ts-expect-error
     lens,
   });
 }
