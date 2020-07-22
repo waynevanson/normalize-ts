@@ -1,24 +1,18 @@
 import {
-  LazyEntity,
-  RecordData,
-  Relationships,
-  makeEntity,
-  Entity,
-} from "./entity";
-import { makeSchema } from "./schema";
-import { Optional } from "monocle-ts";
-import { Normalized, Denormalized, DenormalizedData } from "./set";
-import {
-  option as O,
-  record as RC,
-  ord as ORD,
   array as A,
   monoid as M,
+  option as O,
+  ord as ORD,
+  record as RC,
 } from "fp-ts";
-import { DictionaryData } from "./normalizr";
-import { pipe } from "fp-ts/lib/function";
-import * as _normalizr from "normalizr";
+import { pipe, flow } from "fp-ts/lib/function";
 import { Ord } from "fp-ts/lib/Ord";
+import { Optional } from "monocle-ts";
+import * as _normalizr from "normalizr";
+import { LazyEntity, RecordData, Relationships } from "./entity";
+import { DictionaryData } from "./normalizr";
+import { makeSchema } from "./schema";
+import { Denormalized, DenormalizedData, Normalized } from "./set";
 
 export function _normalizer(
   schema: SchemaBase,
@@ -47,12 +41,15 @@ export function _normalizer(
       // merge
       (denormalized) => (normalized) => {
         const data = { [plural]: denormalized };
+
+        const dd = _normalizr.normalize(data, normalizrSchema);
         // if not an option, make an option
         const fromdenormalized: Normalized = pipe(
-          _normalizr.normalize(data, normalizrSchema).entities,
-          //@ts-ignore
-          RC.map(RC.compact)
+          dd.entities,
+          //@ts-expect-error
+          RC.map(flow(RC.map(O.fromNullable), RC.compact))
         );
+
         const m = RC.getMonoid(RC.getMonoid({ concat: (x, y) => y }));
         const result = M.fold(m)([normalized, fromdenormalized]);
 
@@ -69,25 +66,10 @@ export function normalize<S extends SchemaBase>(
   schema: S,
   ord?: Ord<string>
 ): NormalizeResult<S> {
-  return normalize(schema, ord) as any;
+  return _normalizer(schema, ord) as any;
 }
 
-type User = { id: string };
-type Post = { id: string; author: User; collaborators: User[] };
-
-const users = () => makeEntity<User>()({});
-
-const posts = () =>
-  makeEntity<Post>()({
-    author: users,
-    collaborators: [users],
-  });
-
-type NormalizeRecordData<
-  T extends RecordData,
-  R extends Relationships,
-  S extends SchemaBase
-> = {
+type NormalizeRecordData<T extends RecordData, R extends Relationships> = {
   [P in keyof T]: P extends keyof R
     ? T[P] extends Array<any>
       ? string[]
@@ -95,18 +77,18 @@ type NormalizeRecordData<
     : T[P];
 };
 
-type NormalizedMap<
-  T extends RecordData,
-  R extends Relationships,
-  S extends SchemaBase
-> = {
-  [P in keyof S]: Record<string, NormalizeRecordData<T, R, S>>;
-};
-
 type NormalizeResult<S extends SchemaBase> = {
-  [P in keyof S]: S[P] extends LazyEntity<infer T, infer R>
-    ? Optional<NormalizedMap<T, R, S>, Array<T>>
+  [P in keyof S]: S[P] extends LazyEntity<infer T, any>
+    ? Optional<
+        {
+          [K in keyof S]: Record<
+            string,
+            S[K] extends LazyEntity<infer U, infer R>
+              ? NormalizeRecordData<U, R>
+              : never
+          >;
+        },
+        Array<T>
+      >
     : never;
 };
-
-type TEST = NormalizeResult<typeof schema>["posts"]["getOption"];

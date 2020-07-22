@@ -38,10 +38,10 @@ export function makeNormalizrEntity({
 }: NormalizrEntityParams): NormalizrEntity {
   return new _schema.Entity(name, relationships, {
     idAttribute: lens.get,
-    mergeStrategy: (x, y) => O.some(y),
-    processStrategy: (value) => O.some(value),
+    mergeStrategy: (x, y) => y,
+    processStrategy: (value) => value,
     //@ts-expect-error
-    fallbackStrategy: (key, schema) => O.none,
+    fallbackStrategy: (key, schema) => null,
   });
 }
 
